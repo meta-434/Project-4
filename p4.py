@@ -42,8 +42,11 @@ while cont == "Y":
             selected_assignments = []
             selected_weights = []
             selected_grades = []
+            all_selected_grades = 0
             selected_score = 0.0
             total_score = 0.0
+            temp2 = 0.0
+            tally = 0.0
 
             for x in range(0, len(assignments_holder)):
                 if single_assignments in assignments_holder[x]:
@@ -51,22 +54,34 @@ while cont == "Y":
                     selected_weights.append(weights_holder[x])
                     selected_grades.append(grade_holder[x])
 
+
+            names_list = list(class_dictionary.keys())
+            for v in range(0, len(names_list)):
+                for t in range(0, len(assignments_holder)):
+                    temp = class_dictionary.get(names_list[v], '')
+                    if single_assignments in assignments_holder[t]:
+
+                        total_bottom = float(float(selected_weights[t]) * 100 * (len(names_list) * len(selected_assignments))/(len(names_list)))
+                        all_selected_grades += (float(float(temp[t]) * float(selected_weights[t])) / float(float(selected_weights[t]) * 100 * (len(names_list) * len(selected_assignments))))
+                        total_top = (all_selected_grades) * total_bottom
+
             output_file = open(single_output_name, 'w')
             output_file.write(single_name + '\n----------------------------------------\n')
-            output_file.write('Assignment'.ljust(15) + 'Weight'.ljust(12) + 'Grade'.ljust(10) + '\n')
+            output_file.write('Assignment'.ljust(17) + 'Weight'.ljust(17) + 'Grade'.ljust(12) + '\n')
 
             for y in range (0, len(selected_assignments)):
-                output_file.write(selected_assignments[y].ljust(15) + ((str(float(selected_weights[y]) * 100)) + '%').ljust(12) + str(selected_grades[y]).ljust(10) + '\n')
+                output_file.write(selected_assignments[y].ljust(17) + ((str(float(selected_weights[y]) * 100)) + '%').ljust(17) + str(selected_grades[y]).ljust(12) + '\n')
 
             output_file.write('----------------------------------------\n')
 
             for z in range (0, len(selected_assignments)):
                 selected_score += float(weights_holder[z]) * float(selected_grades[z])
                 total_score += float(weights_holder[z]) * 100
-            print(selected_score)
 
-            output_file.write('Overall:'.ljust(15) + (str(selected_score) + '%/' + str(total_score)).ljust(12))
+            output_file.write('Overall:'.ljust(17) + (str(selected_score) + '%/' + str(total_score) + '%').ljust(17) + ('{0:.1f}'.format((selected_score / total_score) * 100)).ljust(12) + '\n')
+            output_file.write('Class Average:'.ljust(17) + (str(total_top) + '%/' + str(total_bottom) + '%').ljust(17) + str('{0:.1f}'.format((all_selected_grades) * 100)).ljust(12) + '\n')
             output_file.close()
+
             selected_assignments = []
             selected_weights = []
             selected_grades = []
@@ -86,10 +101,8 @@ while cont == "Y":
                 for e in range(0, len(assignments)):
                     grade_list = class_dictionary.get(names_list[q])
                     weighted_grades.append((float(grade_list[e]) * float(weights[e])))
-                    print('grade ' + str(grade_list[e]) + '| weight ' + str(weights[e]) + '| weighted grade ' + str(weighted_grades[e]))
 
             total_class_score = float(sum(weighted_grades)) / int(len(names_list))
-            print(float(total_class_score))
 
             output_file = open(single_output_name, 'w')
 
@@ -111,9 +124,50 @@ while cont == "Y":
             output_file.close()
 
     elif report_type == "A":
+        assignments_holder = assignments
+        weights_holder = weights
+        score_holder = []
+        selected_assignments = []
+        selected_weights = []
+        selected_grades = []
+        grand_total_top = 0.0
+        grand_total_bottom = 0.0
+
         class_assignments = input('Include only assignments containing (blank for all assignments): ')
         class_output_name = input('Enter file name for report: ')
         print ('Writing report to', class_output_name, '\b...')
         print('-------------------------------------------')
+
+        output_file = open(class_output_name, 'w')
+        output_file.write('Summary Report' + '\n' + '----------------------------------------\n')
+
+        if class_assignments != '':
+
+            for x in range(0, len(assignments_holder)):
+                if class_assignments in assignments_holder[x]:
+                    selected_assignments.append(assignments_holder[x])
+                    selected_weights.append(weights_holder[x])
+
+
+            names_list = list(class_dictionary.keys())
+            for r in range(0, len(names_list)):
+                selected_grades = class_dictionary.get(names_list[r], '')
+                output_file.write(str(names_list[r]).ljust(17))
+                for d in range (0, len(selected_weights)):
+                    grand_total_bottom += float(float(selected_weights[d]) * 100)
+                    grand_total_top += float(float(selected_weights[d]) * float(selected_grades[d]))
+
+                output_file.write((str(float(grand_total_top)) + '%/' + str(float(grand_total_bottom)) + '%').ljust(17))
+                output_file.write(str('{0:.1f}'.format((float(grand_total_top)/float(grand_total_bottom))*100)).ljust(12) + '\n')
+                grand_total_top = 0.0
+                grand_total_bottom = 0.0
+
+                    #print(selected_grades[d])
+                    #print(selected_weights[d] + '%')
+
+
+
+
+            output_file.close()
     cont = str(input('Go again? (Y/N): '))
     print('-------------------------------------------')
